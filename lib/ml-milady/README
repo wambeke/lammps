@@ -1,0 +1,9 @@
+Current default is Makefile.mpi_gfortran and Makefile.lammps.gfortran
+
+from src folder-
+```
+make lib-milady
+make lib-milady args="-m mpi_gfortran -e gfortran" # default, same as above
+make lib-milady args="-m mpi_ifort -e ifort" # same as above
+make lib-milady args="-m mpi_intel -e intel" # same as above
+```

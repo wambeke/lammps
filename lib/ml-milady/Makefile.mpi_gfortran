@@ -1,0 +1,85 @@
+# *
+# *_________________________________________________________________________*
+# *      MILADY: Machine Learning Dynamics		                              *
+# *      DESCRIPTION: SEE READ-ME                                           *
+# *      FILE NAME: Makefile                                                *
+# *      AUTHORS: MCM + TDS																		              *
+# *      CONTACT:                                         *
+# *_________________________________________________________________________*/
+
+SHELL = /bin/sh
+
+# which file will be copied to Makefile.lammps
+
+EXTRAMAKE = Makefile.lammps.gfortran
+
+# ------ FILES ------
+
+SRC =T_kind_param_m.F90 gen_com_m.F90 ml_in_lammps_module.F90 angular_functions.F90 \
+     milady_data.F90 neighbours.F90 milady_setup.F90  compute_g2.F90  compute_afs.F90 compute_soap.F90 \
+     compute_bispectrum_so4.F90 compute_pow_so3.F90 compute_pow_so3_3body.F90 compute_kernel.F90 milady_force.F90 \
+     print_matrix.f90
+
+FILES = $(SRC) Makefile
+
+# ------ DEFINITIONS ------
+
+LIB = libmilady.a
+#OBJ =   $(SRC:.F90=.o) $(SRC:.f90=.o)  fm_exp.o
+
+OBJ  =T_kind_param_m.o gen_com_m.o ml_in_lammps_module.o angular_functions.o \
+     milady_data.o neighbours.o milady_setup.o compute_g2.o  compute_afs.o compute_soap.o compute_bispectrum_so4.o \
+     compute_powerspectrum_so4.o compute_pow_so3.o compute_pow_so3_3body.o compute_kernel.o milady_force.o print_matrix.o fm_exp.o
+
+# ------ SETTINGS ------
+
+F90 =           gfortran
+CC  =		mpicc
+#gfortran
+#F90FLAGS = -g -static -Wall -Wextra -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow -finit-real=nan -fbounds-check
+#F90FLAGS =      -fPIC -ffree-form  -ffree-line-length-512 -fbacktrace -O0 -fimplicit-none  -Wall  -fall-intrinsics  -fcheck=all    -pedantic -fstack-protector
+#                -ffpe-trap=invalid,zero,overflow -finit-real=snan -finit-integer=-99999999
+#F90FLAGS =      -Ofast -fPIC -ffree-form  -ffree-line-length-512 -march=native  -ffast-math -funroll-loops
+F90FLAGS =      -O3 -ffree-form -ffree-line-length-512 -fPIC
+#intel
+#F90FLAGS = -O0 -fpe0 -C -traceback -warn all -u -convert big_endian  -ftrapuv -warn all
+#F90FLAGS =      -O3
+FCCFLAGS =      -O3 -fPIC
+#F90FLAGS =      -O
+ARCHIVE =	ar
+ARCHFLAG =	-rcv
+LINK =         	mpicxx
+LINKFLAGS =	-O
+USRLIB =
+SYSLIB =
+
+# ------ MAKE PROCEDURE ------
+
+lib: 	$(OBJ)
+	$(ARCHIVE) $(ARFLAGS) $(LIB) $(OBJ)
+	@cp $(EXTRAMAKE) Makefile.lammps
+
+# ------ COMPILE RULES ------
+
+%.o:%.F
+	$(F90) $(F90FLAGS) -c $<
+
+
+%.o:%.F90
+	$(F90) $(F90FLAGS) -c $<
+
+
+%.o:%.f90
+	$(F90) $(F90FLAGS) -c $<
+
+%.o:%.c
+	$(CC) $(FCCFLAGS) -c $<
+
+include .depend
+# ------ CLEAN ------
+
+clean:
+	-rm -f *.o *.mod *.a  $(LIB)
+
+tar:
+	-tar -cvf ../MILADY.tar $(FILES)

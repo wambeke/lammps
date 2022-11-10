@@ -1,0 +1,87 @@
+# *
+# *_________________________________________________________________________*
+# *      MILADY: Machine Learning Dynamics		                              *
+# *      DESCRIPTION: SEE READ-ME                                           *
+# *      FILE NAME: Makefile                                                *
+# *      AUTHORS: MCM + TDS																		              *
+# *      CONTACT:                                         *
+# *_________________________________________________________________________*/
+
+SHELL = /bin/sh
+
+# which file will be copied to Makefile.lammps
+
+EXTRAMAKE = Makefile.lammps.ifort
+
+# ------ FILES ------
+
+SRC =T_kind_param_m.F90 gen_com_m.F90 ml_in_lammps_module.F90 angular_functions.F90 \
+     milady_data.F90 neighbours.F90 milady_setup.F90  compute_g2.F90  compute_afs.F90 compute_soap.F90 \
+     compute_bispectrum_so4.F90 compute_pow_so3.F90 compute_pow_so3_3body.F90 compute_kernel.F90 milady_force.F90 \
+     print_matrix.f90
+
+FILES = $(SRC) Makefile
+
+# ------ DEFINITIONS ------
+
+LIB = libmilady.a
+#OBJ =   $(SRC:.F90=.o) $(SRC:.f90=.o)  fm_exp.o
+
+OBJ  =T_kind_param_m.o gen_com_m.o ml_in_lammps_module.o angular_functions.o \
+     milady_data.o neighbours.o milady_setup.o compute_g2.o  compute_afs.o compute_soap.o compute_bispectrum_so4.o \
+     compute_powerspectrum_so4.o compute_pow_so3.o compute_pow_so3_3body.o compute_kernel.o milady_force.o print_matrix.o fm_exp.o
+
+# ------ SETTINGS ------
+
+F90 =           ifort
+CC  =		mpicc
+#gfortran
+#F90FLAGS =      -fPIC -ffree-form  -ffree-line-length-512 -fbacktrace -O0 -fimplicit-none  -Wall  -fall-intrinsics  -fcheck=all    -pedantic -fstack-protector
+#F90FLAGS =      -O3 -fPIC -ffree-form  -ffree-line-length-512
+#F90FLAGS =      -O3 -fPIC  -warn all -warn nointerfaces    -traceback
+#F90FLAGS =      -O3 -fPIC     -traceback -I/usr/local/iopenmpi/include/ -L/usr/local/iopenmpi/lib64/
+#intel
+#F90FLAGS = -O0 -fpe0 -fpe-all=0  -C -traceback  -u -convert big_endian  -ftrapuv
+#F90FLAGS = -g -check all -fpe0 -warn -traceback -debug extended
+F90FLAGS =      -O3 -traceback
+#F90FLAGS =   -C -fpe-all=0 -no-ftz -traceback -debug extended -I/usr/local/iopenmpi/include/ -L/usr/local/iopenmpi/lib64/
+#FCCFLAGS =      -O3 -fPIC -traceback
+FCCFLAGS =      -O3 -fPIC
+#F90FLAGS =      -O
+ARCHIVE =	ar
+ARCHFLAG =	-rc
+LINK =         	mpicxx
+LINKFLAGS =	-O
+USRLIB =
+SYSLIB =
+
+# ------ MAKE PROCEDURE ------
+
+lib: 	$(OBJ)
+	$(ARCHIVE) $(ARFLAGS) $(LIB) $(OBJ)
+	@cp $(EXTRAMAKE) Makefile.lammps
+
+# ------ COMPILE RULES ------
+
+%.o:%.F
+	$(F90) $(F90FLAGS) -c $<
+
+
+%.o:%.F90
+	$(F90) $(F90FLAGS) -c $<
+
+
+%.o:%.f90
+	$(F90) $(F90FLAGS) -c $<
+
+%.o:%.c
+	$(CC) $(FCCFLAGS) -c $<
+
+include .depend
+# ------ CLEAN ------
+
+clean:
+	-rm -f *.o *_genmod.f90 *.mod *.a  $(LIB)
+
+tar:
+	-tar -cvf ../MILADY.tar $(FILES)

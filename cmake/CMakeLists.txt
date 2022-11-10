@@ -189,8 +189,10 @@ if(BUILD_SHARED_LIBS AND (CMAKE_SYSTEM_NAME STREQUAL "Windows") AND CMAKE_CROSSC
   set_target_properties(lammps PROPERTIES LINK_FLAGS "-Wl,--export-all-symbols")
 endif()
 
+find_package(LAPACK)
 add_executable(lmp ${MAIN_SOURCES})
-target_link_libraries(lmp PRIVATE lammps)
+target_link_libraries(lmp PRIVATE lammps ${LAPACK_LIBRARIES})
+target_link_libraries(lammps PRIVATE ${LAPACK_LIBRARIES})
 set_target_properties(lmp PROPERTIES OUTPUT_NAME ${LAMMPS_BINARY})
 install(TARGETS lmp EXPORT LAMMPS_Targets DESTINATION ${CMAKE_INSTALL_BINDIR})
 
@@ -245,6 +247,7 @@ set(STANDARD_PACKAGES
   MISC
   ML-HDNNP
   ML-IAP
+  ML-MILADY
   ML-PACE
   ML-QUIP
   ML-RANN
@@ -404,7 +407,7 @@ if(BUILD_OMP)
   target_link_libraries(lmp PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
-if(PKG_MSCG OR PKG_ATC OR PKG_AWPMD OR PKG_ML-QUIP OR PKG_LATTE OR PKG_ELECTRODE)
+if(PKG_MSCG OR PKG_ATC OR PKG_AWPMD OR PKG_ML-QUIP OR PKG_LATTE OR PKG_ELECTRODE OR PKG_ML-MILADY)
   enable_language(C)
   find_package(LAPACK)
   find_package(BLAS)
@@ -542,6 +545,7 @@ endforeach()
 ############################################
 foreach(PKG ${STANDARD_PACKAGES})
   set(${PKG}_SOURCES_DIR ${LAMMPS_SOURCE_DIR}/${PKG})
+  message(STATUS "!!!! add STANDARD_PACKAGES sources ${PKG} in ${${PKG}_SOURCES_DIR}")
 
   file(GLOB ${PKG}_SOURCES ${${PKG}_SOURCES_DIR}/[^.]*.cpp)
   file(GLOB ${PKG}_HEADERS ${${PKG}_SOURCES_DIR}/[^.]*.h)
@@ -583,13 +587,18 @@ endforeach()
 ##############################################
 # add lib sources of (simple) enabled packages
 ############################################
-foreach(PKG_LIB POEMS ATC AWPMD H5MD MESONT)
+foreach(PKG_LIB POEMS ATC AWPMD H5MD MESONT ML-MILADY)
   if(PKG_${PKG_LIB})
+    message(STATUS "!!!! add lib sources ${PKG_LIB}")
     string(TOLOWER "${PKG_LIB}" PKG_LIB)
     if(PKG_LIB STREQUAL "mesont")
       enable_language(Fortran)
       file(GLOB_RECURSE ${PKG_LIB}_SOURCES
         ${LAMMPS_LIB_SOURCE_DIR}/${PKG_LIB}/[^.]*.f90)
+    elseif(PKG_LIB STREQUAL "ml-milady")
+      enable_language(Fortran) # f90 and F90
+      file(GLOB_RECURSE ${PKG_LIB}_SOURCES
+        ${LAMMPS_LIB_SOURCE_DIR}/${PKG_LIB}/[^.]*.[fF]90)
     else()
       file(GLOB_RECURSE ${PKG_LIB}_SOURCES
         ${LAMMPS_LIB_SOURCE_DIR}/${PKG_LIB}/[^.]*.c
@@ -614,6 +623,11 @@ endif()
 
 if(PKG_AWPMD)
   target_link_libraries(awpmd PRIVATE ${LAPACK_LIBRARIES})
+endif()
+
+if(PKG_ML_MILADY)
+  target_link_libraries(ml_milady PRIVATE ${LAPACK_LIBRARIES})
+  target_link_libraries(lmp PRIVATE lammps ${LAPACK_LIBRARIES})
 endif()
 
 if(PKG_ATC)

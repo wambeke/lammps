@@ -1,0 +1,11 @@
+# Settings that the LAMMPS build will import when this package library is used
+#MKLROOT=/opt/intel/MKL_2017/mkl
+#MKLROOT=/opt/intel/oneapi/mkl/latest/
+MKLROOT=/ccc/products/mkl-21.3.0/system/default/21.3.0/mkl/
+MKL_LIB=${MKLROOT}/lib/intel64/libmkl_scalapack_lp64.a -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
+milady_SYSINC = -lifcore -lsvml -liompstubs5 -limf -lirc -lc
+#milady_SYSLIB =  -L${MKLROOT}/../../compilers_and_libraries/linux/lib/intel64  ${milady_SYSINC}  ${MKL_LIB}
+COMPILER=/ccc/products/ifort-20.0.0/system/default/20.0.0/lib/intel64/
+milady_SYSLIB =  -L${COMPILER}  ${milady_SYSINC}  ${MKL_LIB}
+
+milady_SYSPATH =

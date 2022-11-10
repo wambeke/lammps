@@ -43,6 +43,7 @@ Thumbs.db
 
 #cmake
 /build*
+/install*
 /CMakeCache.txt
 /CMakeFiles/
 /Testing

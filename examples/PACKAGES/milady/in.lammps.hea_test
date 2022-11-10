@@ -1,0 +1,26 @@
+units metal
+boundary	p p p
+atom_style	atomic
+atom_modify     map array sort 0 0.0
+box tilt large 
+
+read_data	hea_01.lmp
+#read_data	bulk.lmp
+
+#replicate 4 4 4 # for larger system size test
+
+pair_style      milady
+#pair_coeff	* * Fe.milady.test  Fe
+#pair_coeff	* * Fe.milady  Fe
+#pair_coeff	* * hea_test.pot  Ta Ti V W
+pair_coeff	* * hea_afs.pot  Ta Ti V W
+
+#displace_atoms all random 0.1 0.1 0.1 2342 units box
+
+thermo_style    custom step etotal pe ke fnorm temp pxx pyy pzz pxy pxz pyz press vol
+thermo_modify lost warn
+thermo 1
+run 0
+
+#fix seal all nve
+#run 20
